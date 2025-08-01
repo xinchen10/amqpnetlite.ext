@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net48;net5.0</TargetFrameworks>
+    <AssemblyName>Test.Amqp.Extensions.Net</AssemblyName>
+    <RootNamespace>Test.Amqp.Extensions.Net</RootNamespace>
+	<IsTestProject>true</IsTestProject>
+	<IsPackable>false</IsPackable>
+    <IntermediateOutputPath>..\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+    <OutputPath>..\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\amqpnetlite\test\Common\Extensions.cs" Link="Common\Extensions.cs" />
+    <Compile Include="..\..\amqpnetlite\test\Common\TestAmqpBroker.cs" Link="Common\TestAmqpBroker.cs" />
+    <Compile Include="..\..\amqpnetlite\test\Common\TestTarget.cs" Link="Common\TestTarget.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Condition="'$(TargetFramework)' == 'net48'" Include="System.Transactions" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+	<PackageReference Include="MSTest.TestAdapter" Version="3.4.3" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.4.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Amqp.Net.Extensions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Common\" />
+  </ItemGroup>
+</Project>

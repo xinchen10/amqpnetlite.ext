@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net48;net5.0</TargetFrameworks>
+    <AssemblyName>Amqp.Net.Extensions</AssemblyName>
+    <RootNamespace>Amqp</RootNamespace>
+    <PackageId>AmqpNetLite.Extensions</PackageId>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
+    <IntermediateOutputPath>..\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+    <OutputPath>..\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <DocumentationFile>..\bin\$(Configuration)\$(MSBuildProjectName)\$(AssemblyName).XML</DocumentationFile>
+  </PropertyGroup>
+    
+  <ItemGroup>
+    <ProjectReference Include="..\amqpnetlite\src\Amqp.Net.csproj" />
+  </ItemGroup>
+
+</Project>
