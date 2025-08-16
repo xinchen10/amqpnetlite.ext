@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net48;net5.0</TargetFrameworks>
-    <AssemblyName>Test.Amqp.Extensions.Net</AssemblyName>
-    <RootNamespace>Test.Amqp.Extensions.Net</RootNamespace>
+    <AssemblyName>Test.Amqp.Net.Extensions</AssemblyName>
+    <RootNamespace>Test.Amqp.Net.Extensions</RootNamespace>
 	<IsTestProject>true</IsTestProject>
 	<IsPackable>false</IsPackable>
     <IntermediateOutputPath>..\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
@@ -24,8 +24,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Amqp.Net.Extensions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Common\" />
   </ItemGroup>
 </Project>

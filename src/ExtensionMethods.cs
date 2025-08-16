@@ -19,7 +19,7 @@ namespace Amqp
 {
     using System;
 
-    static class Extensions
+    static class ExtensionMethods
     {
         public static T[] Add<T>(this T[] array, T item)
         {

@@ -62,7 +62,7 @@ namespace ServiceBus.Claims
             receiver.Accept(message);
             await receiver.CloseAsync();
 
-            cbs.Close();
+            await cbs.CloseAsync();
             await session.CloseAsync();
             await connection.CloseAsync();
         }

@@ -31,8 +31,12 @@ namespace Amqp.Claims
     /// </summary>
     public class CbsClient : IHandler
     {
-        const string CapabilityName = "AMQP_CBS_V1_0";
-        const string CbsNodeName = "$cbs";
+        /// <summary>AMQP CBS capability name.</summary>
+        public const string CapabilityName = "AMQP_CBS_V1_0";
+
+        /// <summary>AMQP CBS node name.</summary>
+        public const string CbsNodeName = "$CBS";
+
         const int DefaultTokenExpiryInSeconds = 20 * 60;
         readonly ITokenProvider tokenProvider;
         readonly Dictionary<string, Entry> renewEntries;
@@ -40,6 +44,7 @@ namespace Amqp.Claims
         ICbsClient cbsClient;
         Timer renewTimer;
         DateTime timerExpiry;
+        bool closed;
 
         /// <summary>
         /// The event handlers to be notified for token renewal errors.
@@ -115,9 +120,19 @@ namespace Amqp.Claims
         /// <summary>
         /// Closes the CBS client.
         /// </summary>
-        public void Close()
+        public Task CloseAsync(Error error = null)
         {
-            this.StopTimer();
+            if (!this.closed)
+            {
+                this.closed = true;
+                this.StopTimer();
+                if (this.cbsClient != null)
+                {
+                    return this.cbsClient.CloseAsync(error, CancellationToken.None);
+                }
+            }
+
+            return Task.CompletedTask;
         }
 
         static void OnRenew(object state)
@@ -251,7 +266,9 @@ namespace Amqp.Claims
         bool IHandler.CanHandle(EventId id)
         {
             return id == EventId.ConnectionLocalOpen ||
-                id == EventId.ConnectionRemoteOpen;
+                id == EventId.ConnectionRemoteOpen ||
+                id == EventId.ConnectionLocalClose ||
+                id == EventId.ConnectionRemoteClose;
         }
 
         void OnLocalOpen(Connection connection, Open open)
@@ -283,6 +300,10 @@ namespace Amqp.Claims
                 case EventId.ConnectionRemoteOpen:
                     this.OnRemoteOpen(protocolEvent.Connection, (Open)protocolEvent.Context);
                     break;
+                case EventId.ConnectionRemoteClose:
+                case EventId.ConnectionLocalClose:
+                    this.CloseAsync(((Close)protocolEvent.Context).Error);
+                    break;
                 default:
                     break;
             }
@@ -297,6 +318,8 @@ namespace Amqp.Claims
 
         interface ICbsClient
         {
+            Task CloseAsync(Error error, CancellationToken cancellationToken);
+
             Task SetTokenAsync(string audience, TokenInfo token, CancellationToken cancellationToken);
         }
 
@@ -309,6 +332,11 @@ namespace Amqp.Claims
             public MessageBasedClient(Connection connection)
                 : base(connection, CbsNodeName)
             {
+            }
+
+            Task ICbsClient.CloseAsync(Error error, CancellationToken cancellationToken)
+            {
+                return this.CloseAsync(TimeSpan.FromSeconds(20), error);
             }
 
             async Task ICbsClient.SetTokenAsync(string audience, TokenInfo token, CancellationToken cancellationToken)
@@ -354,6 +382,11 @@ namespace Amqp.Claims
             public LinkBasedClient(Connection connection, string nodeName)
                 : base(new Session(connection), nodeName, nodeName)
             {
+            }
+
+            Task ICbsClient.CloseAsync(Error error, CancellationToken cancellationToken)
+            {
+                return this.Session.CloseAsync(TimeSpan.FromSeconds(20), error);
             }
 
             Task ICbsClient.SetTokenAsync(string audience, TokenInfo token, CancellationToken cancellationToken)

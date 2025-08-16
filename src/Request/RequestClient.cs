@@ -103,7 +103,14 @@ namespace Amqp.Request
         {
             foreach (var req in this.requests)
             {
-                req.Value.OnCancel(false);
+                if (error == null)
+                {
+                    req.Value.OnCancel(false);
+                }
+                else
+                {
+                    req.Value.OnException(new AmqpException(error), false);
+                }
             }
 
             return true;
