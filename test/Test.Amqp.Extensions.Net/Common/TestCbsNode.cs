@@ -19,11 +19,12 @@ namespace Test.Amqp.Extensions
 {
     using System;
     using System.Collections.Generic;
-    using System.Security.Cryptography.X509Certificates;
     using global::Amqp;
     using global::Amqp.Claims;
     using global::Amqp.Framing;
+    using global::Amqp.Handler;
     using global::Amqp.Listener;
+    using global::Amqp.Types;
     using Listener.IContainer;
     using Test.Common;
 
@@ -31,11 +32,31 @@ namespace Test.Amqp.Extensions
     {
         public string Name => CbsClient.CbsNodeName;
 
+        public Symbol Capability { get; set; }
+
         bool INode.AttachLink(ListenerConnection connection, ListenerSession session, ListenerLink link, Attach attach)
         {
             attach.SndSettleMode = SenderSettleMode.Settled;
             var cache = connection.GetOrAddProperty<TokenCache>(Name, () => new TokenCache());
             return cache.OnLink(link, attach);
+        }
+
+        bool IHandler.CanHandle(EventId id)
+        {
+            return Capability != null && id == EventId.ConnectionLocalOpen;
+        }
+
+        void IHandler.Handle(Event protocolEvent)
+        {
+            switch (protocolEvent.Id)
+            {
+                case EventId.ConnectionLocalOpen:
+                    var open = (Open)protocolEvent.Context;
+                    open.OfferedCapabilities = open.OfferedCapabilities.Add(Capability);
+                    break;
+                default:
+                    break;
+            }
         }
 
         sealed class TokenCache
@@ -88,24 +109,25 @@ namespace Test.Amqp.Extensions
             static void OnMessage(ListenerLink link, Message request, DeliveryState deliveryState, object state)
             {
                 var thisPtr = (TokenCache)state;
-                if (thisPtr.sender == null)
+                var message = TestAmqpBroker.Decode(request);
+                var audience = (string)message.ApplicationProperties["name"];
+                if (string.IsNullOrEmpty(audience))
                 {
-                    var _ = thisPtr.receiver.CloseAsync(TimeSpan.FromSeconds(20), new Error("cbs:missing-response-link"));
-                    return;
+                    throw new UnauthorizedAccessException();
                 }
 
+                thisPtr.tokens[audience] = (string)message.Body;
                 link.DisposeMessage(request, new Accepted(), true);
-                request = TestAmqpBroker.Decode(request);
-                var audience = (string)request.ApplicationProperties["name"];
-                thisPtr.tokens[audience] = (string)request.Body;
+                if (thisPtr.sender != null)
+                {
+                    var response = new Message();
+                    response.Properties = new Properties();
+                    response.Properties.CorrelationId = message.Properties.MessageId;
+                    response.ApplicationProperties = new ApplicationProperties();
+                    response.ApplicationProperties["status-code"] = 200;
 
-                var response = new Message();
-                response.Properties = new Properties();
-                response.Properties.CorrelationId = request.Properties.MessageId;
-                response.ApplicationProperties = new ApplicationProperties();
-                response.ApplicationProperties["status-code"] = 200;
-
-                thisPtr.sender.SendMessage(response);
+                    thisPtr.sender.SendMessage(response);
+                }
             }
         }
     }

@@ -12,6 +12,7 @@
     <Compile Include="..\..\amqpnetlite\test\Common\Extensions.cs" Link="Common\Extensions.cs" />
     <Compile Include="..\..\amqpnetlite\test\Common\TestAmqpBroker.cs" Link="Common\TestAmqpBroker.cs" />
     <Compile Include="..\..\amqpnetlite\test\Common\TestTarget.cs" Link="Common\TestTarget.cs" />
+    <Compile Include="..\..\src\ExtensionMethods.cs" Link="Common\ExtensionMethods.cs" />
   </ItemGroup>
 
   <ItemGroup>

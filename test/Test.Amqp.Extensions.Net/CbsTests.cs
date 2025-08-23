@@ -31,13 +31,16 @@ namespace Test.Amqp.Extensions
         const string address = "amqp://localhost:5672";
         TestAmqpBroker broker;
 
-        [TestInitialize]
-        public void TestInit()
+        static CbsTests()
         {
             //Trace.TraceLevel = TraceLevel.Frame;
             //Trace.TraceListener = (l, f, a) => System.Diagnostics.Trace.WriteLine(System.DateTime.Now.ToString("[hh:mm:ss.fff]") + " " + string.Format(f, a));
+        }
+
+        public void TestInit(string capability)
+        {
             broker = new TestAmqpBroker(new[] { address }, null, null, null);
-            broker.AddNode(new TestCbsNode());
+            broker.AddNode(new TestCbsNode() { Capability = capability });
             broker.Start();
         }
 
@@ -48,12 +51,24 @@ namespace Test.Amqp.Extensions
         }
 
         [TestMethod]
-        public async Task CbsSendReceiveTest()
+        public async Task CbsRequestResponseTest()
+        {
+            TestInit(null);
+            await RunCbsSendReceiveTest(nameof(CbsRequestResponseTest));
+        }
+
+        [TestMethod]
+        public async Task CbsLinkTest()
+        {
+            TestInit(CbsClient.CapabilityName);
+            await RunCbsSendReceiveTest(nameof(CbsLinkTest));
+        }
+
+        async Task RunCbsSendReceiveTest(string entity)
         {
             var factory = new ConnectionFactory();
             factory.SASL.Profile = SaslProfile.Anonymous;
 
-            string entity = nameof(CbsSendReceiveTest);
             var addressUri = new Address(address);
 
             var cbs = new CbsClient(new TestTokenProvider());
@@ -77,12 +92,24 @@ namespace Test.Amqp.Extensions
         }
 
         [TestMethod]
+        public async Task CbsRequestLinkCreditTest()
+        {
+            TestInit(null);
+            await RunCbsLinkCreditTest(nameof(CbsRequestLinkCreditTest));
+        }
+
+        [TestMethod]
         public async Task CbsLinkCreditTest()
+        {
+            TestInit(CbsClient.CapabilityName);
+            await RunCbsLinkCreditTest(nameof(CbsLinkCreditTest));
+        }
+
+        public async Task RunCbsLinkCreditTest(string entity)
         {
             var factory = new ConnectionFactory();
             factory.SASL.Profile = SaslProfile.Anonymous;
 
-            string entity = nameof(CbsSendReceiveTest);
             var addressUri = new Address(address);
 
             var cbs = new CbsClient(new TestTokenProvider());

@@ -396,6 +396,7 @@ namespace Amqp.Claims
                     request.Properties = new Properties();
                     request.Properties.Subject = "set-token";
                     request.ApplicationProperties = new ApplicationProperties();
+                    request.ApplicationProperties["name"] = audience;
                     request.ApplicationProperties["token-type"] = token.Type;
 
                     return this.SendAsync(request);
