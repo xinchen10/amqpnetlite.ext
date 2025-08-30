@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceBus.Claims", "exampl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "depends", "depends", "{51CC11A0-92D5-4349-9CE4-9823ADB5BB0E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Amqp.Net.Extensions", "test\Test.Amqp.Extensions.Net\Test.Amqp.Net.Extensions.csproj", "{3A3720DE-5C40-4DC2-BB19-32D54668EF32}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Amqp.Net.Extensions", "test\Test.Amqp.Net.Extensions\Test.Amqp.Net.Extensions.csproj", "{3A3720DE-5C40-4DC2-BB19-32D54668EF32}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
