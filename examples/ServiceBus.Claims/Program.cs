@@ -35,22 +35,34 @@ namespace ServiceBus.Claims
                 return;
             }
 
-            Trace.TraceLevel = TraceLevel.Frame;
-            Trace.TraceListener = (l, f, a) => Console.WriteLine(System.DateTime.Now.ToString("[hh:mm:ss.fff]") + " " + string.Format(f, a));
-            
-            // Endpoint=sb://contoso.servicebus.windows.net/;SharedAccessKeyName=someKeyName;SharedAccessKey=someKeyValue;EntityPath=foo
+            //Trace.TraceLevel = TraceLevel.Frame;
+            //Trace.TraceListener = (l, f, a) => Console.WriteLine(DateTime.Now.ToString("[hh:mm:ss.fff]") + " " + string.Format(f, a));
+
             var kvp = args[0].Split(';').Select(s => s.Split(new[] { '=' }, 2)).ToDictionary(a => a[0], a => a[1]);
-            var tokenProvider = new SharedAccessTokenProvider(kvp["SharedAccessKeyName"], kvp["SharedAccessKey"]);
+            Address address = new Address($"amqps://{new Uri(kvp["Endpoint"]).Host}");
+            string entity = kvp["EntityPath"];
+
+            ITokenProvider tokenProvider;
+            string audience;
+            if (kvp.TryGetValue("SharedAccessKeyName", out string sasKeyName) &&
+                kvp.TryGetValue("SharedAccessKey", out string sasKey))
+            {
+                tokenProvider = new SharedAccessTokenProvider(sasKeyName, sasKey);
+                audience = $"http://{address.Host}/{entity}";
+            }
+            else
+            {
+                tokenProvider = new AzureCredentialTokenProvider();
+                audience = AzureCredentialTokenProvider.ServiceBusAudience;
+            }
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.SASL.Profile = SaslProfile.Anonymous;
-            Address address = new Address($"amqps://{new Uri(kvp["Endpoint"]).Host}");
 
             var cbs = new CbsClient(tokenProvider);
             var connection = await factory.CreateAsync(address, cbs);
 
-            string entity = kvp["EntityPath"];
-            await cbs.AuthenticateAsync($"http://{address.Host}/{entity}", new[] { "Send", "Listen" }, true, CancellationToken.None);
+            await cbs.AuthenticateAsync(audience, new[] { "Send", "Listen" }, true, CancellationToken.None);
 
             var session = new Session(connection);
             var sender = new SenderLink(session, "queue-sender", entity);
