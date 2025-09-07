@@ -389,7 +389,7 @@ namespace Amqp.Claims
                 return this.Session.CloseAsync(TimeSpan.FromSeconds(20), error);
             }
 
-            Task ICbsClient.SetTokenAsync(string audience, TokenInfo token, CancellationToken cancellationToken)
+            async Task ICbsClient.SetTokenAsync(string audience, TokenInfo token, CancellationToken cancellationToken)
             {
                 using (var request = new Message(token.Token))
                 {
@@ -399,7 +399,7 @@ namespace Amqp.Claims
                     request.ApplicationProperties["name"] = audience;
                     request.ApplicationProperties["token-type"] = token.Type;
 
-                    return this.SendAsync(request);
+                    await this.SendAsync(request).ConfigureAwait(false);
                 }
             }
         }
