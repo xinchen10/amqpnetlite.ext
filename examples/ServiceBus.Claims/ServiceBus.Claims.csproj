@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net48;net6.0</TargetFrameworks>
+    <TargetFrameworks>net48;net5.0</TargetFrameworks>
     <AssemblyName>ServiceBus.Claims</AssemblyName>
     <RootNamespace>ServiceBus.Claims</RootNamespace>
     <IntermediateOutputPath>..\..\..\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
@@ -10,7 +10,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.15.0" />
+    <PackageReference Include="Azure.Identity" Version="1.13.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Amqp.Net.Extensions.csproj" />
